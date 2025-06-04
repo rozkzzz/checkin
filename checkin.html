@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบเช็คอิน</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 400px;
+      margin: auto;
+      background-color: #f9f9f9;
+    }
+    input, button {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.5rem;
+    }
+    .status {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h2>📍 ระบบเช็คอินพิกัด</h2>
+  <label for="name">ชื่อ:</label>
+  <input type="text" id="name" placeholder="พิมพ์ชื่อของคุณ">
+  <button onclick="checkIn()">✅ เช็คอิน</button>
+  <div class="status" id="status"></div>
+
+  <script>
+    function checkIn() {
+      const name = document.getElementById("name").value.trim();
+      const status = document.getElementById("status");
+      if (!name) {
+        alert("กรุณากรอกชื่อก่อน");
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        status.textContent = "อุปกรณ์นี้ไม่รองรับการดึงตำแหน่ง";
+        return;
+      }
+
+      status.textContent = "📡 กำลังดึงพิกัด...";
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const timestamp = new Date().toISOString();
+
+          fetch("https://script.google.com/macros/s/AKfycbyhyn0S_S2Ih0ktbw5A42epX8POTkqPiLb8X03ekgQkXps8ftFqasQYu87i7_kFe1lLyQ/exec", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: name,
+              lat: lat,
+              lng: lng,
+              timestamp: timestamp
+            })
+          })
+          .then((res) => res.text())
+          .then((data) => {
+            status.textContent = "✅ เช็คอินสำเร็จแล้ว!";
+          })
+          .catch((err) => {
+            status.textContent = "❌ เกิดข้อผิดพลาด: " + err;
+          });
+        },
+        (err) => {
+          status.textContent = "❌ ไม่สามารถดึงพิกัดได้: " + err.message;
+        }
+      );
+    }
+  </script>
+</body>
+</html>
