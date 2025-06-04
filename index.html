@@ -24,43 +24,52 @@
   <button onclick="checkIn()">✅ เช็คอินพร้อมพิกัด</button>
   <div class="status" id="status"></div>
 
-  <script>
-    function checkIn() {
-      const name = document.getElementById("name").value.trim();
-      const statusDiv = document.getElementById("status");
+<script>
+  function checkIn() {
+    const name = document.getElementById("name").value.trim();
+    const statusDiv = document.getElementById("status");
 
-      if (!name) {
-        alert("กรุณากรอกชื่อก่อนเช็คอิน");
-        return;
-      }
-
-      if (!navigator.geolocation) {
-        statusDiv.textContent = "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง";
-        return;
-      }
-
-      statusDiv.textContent = "กำลังดึงพิกัด...";
-
-      navigator.geolocation.getCurrentPosition(position => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        const url = `https://script.google.com/macros/s/AKfycbx5E7Ex88dQ_8-JOvV0dHk0onm4VR5foaFKCtHZyrX06NgkDo_eArPD9phux912lb-GkQ/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}`;
-
-        fetch(url)
-          .then(res => res.text())
-          .then(msg => {
-            statusDiv.textContent = "✅ เช็คอินสำเร็จ";
-          })
-          .catch(err => {
-            console.error(err);
-            statusDiv.textContent = "❌ เกิดข้อผิดพลาดขณะส่งข้อมูล";
-          });
-      }, err => {
-        console.error(err);
-        statusDiv.textContent = "❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง";
-      });
+    if (!name) {
+      alert("กรุณากรอกชื่อก่อนเช็คอิน");
+      return;
     }
-  </script>
+
+    if (!navigator.geolocation) {
+      statusDiv.textContent = "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง";
+      return;
+    }
+
+    statusDiv.textContent = "กำลังดึงพิกัด...";
+
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      const url = `https://script.google.com/macros/s/AKfycbx5E7Ex88dQ_8-JOvV0dHk0onm4VR5foaFKCtHZyrX06NgkDo_eArPD9phux912lb-GkQ/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}`;
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+          return res.json();  // แปลง response เป็น JSON
+        })
+        .then(data => {
+          if (data.status === 'success') {
+            statusDiv.textContent = "✅ เช็คอินสำเร็จ";
+          } else {
+            statusDiv.textContent = "❌ เกิดข้อผิดพลาด: " + (data.message || 'ไม่ทราบสาเหตุ');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          statusDiv.textContent = "❌ เกิดข้อผิดพลาดขณะส่งข้อมูล";
+        });
+
+    }, err => {
+      console.error(err);
+      statusDiv.textContent = "❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง";
+    });
+  }
+</script>
+
 </body>
 </html>
