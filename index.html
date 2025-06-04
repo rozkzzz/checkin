@@ -1,130 +1,164 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>ระบบเช็คอิน</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-        font-family: 'Inter', sans-serif; /* Using Inter font */
-        padding: 20px;
-        background: #f2f2f2;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh; /* Ensure it takes full viewport height */
-        margin: 0;
+  <meta charset="UTF-8">
+  <title>ระบบเช็คอิน</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
     }
-    h1 {
-        color: #333;
-        margin-bottom: 20px;
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #e0f7fa, #f1f8e9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-    input, button {
-      font-size: 1rem;
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-      box-sizing: border-box;
-        border: 1px solid #ccc;
-        border-radius: 8px; /* Rounded corners */
-    }
-    button {
-        background-color: #4CAF50;
-        color: white;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
-        border: none;
-    }
-    button:hover {
-        background-color: #45a049;
-    }
-    .status {
-        margin-top: 15px;
-        color: green;
-        font-weight: bold;
-        text-align: center;
-        padding: 10px;
-        border-radius: 8px;
-        background-color: #e6ffe6;
-        min-height: 20px; /* Ensure space for messages */
-    }
+
     .container {
-        background: #fff;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        width: 90%;
-        max-width: 400px;
+      background: #fff;
+      padding: 30px 25px;
+      border-radius: 16px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      width: 90%;
+      max-width: 400px;
+      animation: fadeIn 0.5s ease-in-out;
     }
-    /* Responsive adjustments */
-    @media (max-width: 600px) {
-        body {
-            padding: 10px;
-        }
-        .container {
-            padding: 20px;
-            width: 95%;
-        }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-  </style>
+
+    h1 {
+      color: #2e7d32;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    input {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      width: 100%;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 12px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 6px 12px rgba(76, 175, 80, 0.25);
+    }
+
+    button:hover {
+      background-color: #43a047;
+      transform: translateY(-1px);
+    }
+
+    .status {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: 500;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .status.success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      display: block;
+    }
+
+    .status.error {
+      background-color: #ffebee;
+      color: #c62828;
+      display: block;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>ระบบเช็คอิน</h1>
-    <label for="name">กรอกชื่อของคุณ:</label>
-    <input type="text" id="name" placeholder="ชื่อ-สกุล">
-    <button onclick="checkIn()">✅ เช็คอินพร้อมพิกัด</button>
-    <div class="status" id="status"></div>
-  </div>
+  <div class="container">
+    <h1>ระบบเช็คอิน</h1>
+    <label for="name">กรอกชื่อของคุณ</label>
+    <input type="text" id="name" placeholder="ชื่อ-สกุล">
+    <button onclick="checkIn()">✅ เช็คอินพร้อมพิกัด</button>
+    <div class="status" id="status"></div>
+  </div>
 
-<script>
-  function checkIn() {
-    const name = document.getElementById("name").value.trim();
-    const statusDiv = document.getElementById("status");
+  <script>
+    function checkIn() {
+      const name = document.getElementById("name").value.trim();
+      const statusDiv = document.getElementById("status");
 
-    if (!name) {
-      alert("กรุณากรอกชื่อก่อนเช็คอิน");
-      return;
+      if (!name) {
+        alert("กรุณากรอกชื่อก่อนเช็คอิน");
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        updateStatus("เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง", "error");
+        return;
+      }
+
+      updateStatus("📍 กำลังดึงพิกัด...", "success");
+
+      navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        const callbackName = 'jsonpCallback_' + Math.floor(Math.random() * 1000000);
+        window[callbackName] = function(response) {
+          if (response.status === 'success') {
+            updateStatus("✅ เช็คอินสำเร็จ", "success");
+          } else {
+            updateStatus("❌ เกิดข้อผิดพลาด: " + (response.message || 'ไม่ทราบสาเหตุ'), "error");
+          }
+          delete window[callbackName];
+          document.getElementById(callbackName).remove();
+        };
+
+        const url = `https://script.google.com/macros/s/AKfycbwf_7sVnpPsXUQeRwmn-x3ZphA5IaLpuHK0gDAwoFMkBf6pC14YNX8ND5sGxZG7azG6YA/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}&callback=${callbackName}`;
+
+        const script = document.createElement('script');
+        script.src = url;
+        script.id = callbackName;
+        document.body.appendChild(script);
+
+      }, err => {
+        console.error(err);
+        updateStatus("❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง", "error");
+      });
     }
 
-    if (!navigator.geolocation) {
-      statusDiv.textContent = "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง";
-      return;
+    function updateStatus(message, type) {
+      const statusDiv = document.getElementById("status");
+      statusDiv.textContent = message;
+      statusDiv.className = "status " + type;
     }
-
-    statusDiv.textContent = "กำลังดึงพิกัด...";
-
-    navigator.geolocation.getCurrentPosition(position => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-
-      const callbackName = 'jsonpCallback_' + Math.floor(Math.random() * 1000000);
-      window[callbackName] = function(response) {
-        if (response.status === 'success') {
-          statusDiv.textContent = "✅ เช็คอินสำเร็จ";
-        } else {
-          statusDiv.textContent = "❌ เกิดข้อผิดพลาด: " + (response.message || 'ไม่ทราบสาเหตุ');
-        }
-
-        delete window[callbackName];
-        document.getElementById(callbackName).remove();
-      };
-
-      const url = `https://script.google.com/macros/s/AKfycbwf_7sVnpPsXUQeRwmn-x3ZphA5IaLpuHK0gDAwoFMkBf6pC14YNX8ND5sGxZG7azG6YA/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}&callback=${callbackName}`;
-
-      const script = document.createElement('script');
-      script.src = url;
-      script.id = callbackName;
-      document.body.appendChild(script);
-
-    }, err => {
-      console.error(err);
-      statusDiv.textContent = "❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง";
-    });
-  }
-</script>
-
+  </script>
 </body>
 </html>
