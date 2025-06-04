@@ -80,76 +80,50 @@
   </div>
 
 <script>
-  function checkIn() {
-    const name = document.getElementById("name").value.trim();
-    const statusDiv = document.getElementById("status");
+  function checkIn() {
+    const name = document.getElementById("name").value.trim();
+    const statusDiv = document.getElementById("status");
 
-    // Clear previous status message
-    statusDiv.textContent = "";
+    if (!name) {
+      alert("กรุณากรอกชื่อก่อนเช็คอิน");
+      return;
+    }
 
-    if (!name) {
-      // Replaced alert with direct message in statusDiv
-      statusDiv.textContent = "กรุณากรอกชื่อก่อนเช็คอิน";
-      statusDiv.style.color = "red";
-      statusDiv.style.backgroundColor = "#ffe6e6";
-      return;
-    }
+    if (!navigator.geolocation) {
+      statusDiv.textContent = "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง";
+      return;
+    }
 
-    if (!navigator.geolocation) {
-      statusDiv.textContent = "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง";
-      statusDiv.style.color = "red";
-      statusDiv.style.backgroundColor = "#ffe6e6";
-      return;
-    }
+    statusDiv.textContent = "กำลังดึงพิกัด...";
 
-    statusDiv.textContent = "กำลังดึงพิกัด...";
-    statusDiv.style.color = "orange";
-    statusDiv.style.backgroundColor = "#fffbe6";
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
 
+      const callbackName = 'jsonpCallback_' + Math.floor(Math.random() * 1000000);
+      window[callbackName] = function(response) {
+        if (response.status === 'success') {
+          statusDiv.textContent = "✅ เช็คอินสำเร็จ";
+        } else {
+          statusDiv.textContent = "❌ เกิดข้อผิดพลาด: " + (response.message || 'ไม่ทราบสาเหตุ');
+        }
 
-    navigator.geolocation.getCurrentPosition(position => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
+        delete window[callbackName];
+        document.getElementById(callbackName).remove();
+      };
 
-      // Make sure to use the correct deployed Apps Script URL
-      const url = `https://script.google.com/macros/s/AKfycbx5E7Ex88dQ_8-JOvV0dHk0onm4VR5foaFKCtHZyrX06NgkDo_eArPD9phux912lb-GkQ/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}`;
+      const url = `https://script.google.com/macros/s/AKfycbwf_7sVnpPsXUQeRwmn-x3ZphA5IaLpuHK0gDAwoFMkBf6pC14YNX8ND5sGxZG7azG6YA/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}&callback=${callbackName}`;
 
-      fetch(url)
-        .then(res => {
-          if (!res.ok) {
-                // Handle HTTP errors more specifically
-                statusDiv.textContent = `❌ HTTP error! status: ${res.status}`;
-                statusDiv.style.color = "red";
-                statusDiv.style.backgroundColor = "#ffe6e6";
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-          return res.json();  // Convert response to JSON
-        })
-        .then(data => {
-          if (data.status === 'success') {
-            statusDiv.textContent = "✅ เช็คอินสำเร็จ";
-            statusDiv.style.color = "green";
-            statusDiv.style.backgroundColor = "#e6ffe6";
-          } else {
-            statusDiv.textContent = "❌ เกิดข้อผิดพลาด: " + (data.message || 'ไม่ทราบสาเหตุ');
-            statusDiv.style.color = "red";
-            statusDiv.style.backgroundColor = "#ffe6e6";
-          }
-        })
-        .catch(err => {
-          console.error("Fetch error:", err);
-          statusDiv.textContent = "❌ เกิดข้อผิดพลาดขณะส่งข้อมูล";
-          statusDiv.style.color = "red";
-          statusDiv.style.backgroundColor = "#ffe6e6";
-        });
+      const script = document.createElement('script');
+      script.src = url;
+      script.id = callbackName;
+      document.body.appendChild(script);
 
-    }, err => {
-      console.error("Geolocation error:", err);
-      statusDiv.textContent = "❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง";
-      statusDiv.style.color = "red";
-      statusDiv.style.backgroundColor = "#ffe6e6";
-    });
-  }
+    }, err => {
+      console.error(err);
+      statusDiv.textContent = "❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง";
+    });
+  }
 </script>
 
 </body>
