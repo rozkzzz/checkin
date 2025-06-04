@@ -2,82 +2,64 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบเช็คอิน</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 2rem;
-      max-width: 400px;
-      margin: auto;
-      background-color: #f9f9f9;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f2f2f2; }
+    h1 { color: #333; }
     input, button {
-      font-size: 1.2rem;
-      margin-top: 1rem;
+      font-size: 1rem;
+      padding: 10px;
+      margin-top: 10px;
       width: 100%;
-      padding: 0.5rem;
+      box-sizing: border-box;
     }
-    .status {
-      margin-top: 1rem;
-      font-weight: bold;
-      color: green;
-    }
+    .status { margin-top: 15px; color: green; }
   </style>
 </head>
 <body>
-  <h2>📍 ระบบเช็คอินพิกัด</h2>
-  <label for="name">ชื่อ:</label>
-  <input type="text" id="name" placeholder="พิมพ์ชื่อของคุณ">
-  <button onclick="checkIn()">✅ เช็คอิน</button>
+  <h1>ระบบเช็คอิน</h1>
+  <label for="name">กรอกชื่อของคุณ:</label>
+  <input type="text" id="name" placeholder="ชื่อ-สกุล">
+  <button onclick="checkIn()">✅ เช็คอินพร้อมพิกัด</button>
   <div class="status" id="status"></div>
 
   <script>
     function checkIn() {
       const name = document.getElementById("name").value.trim();
-      const status = document.getElementById("status");
+      const statusDiv = document.getElementById("status");
+
       if (!name) {
-        alert("กรุณากรอกชื่อก่อน");
+        alert("กรุณากรอกชื่อก่อนเช็คอิน");
         return;
       }
 
       if (!navigator.geolocation) {
-        status.textContent = "อุปกรณ์นี้ไม่รองรับการดึงตำแหน่ง";
+        statusDiv.textContent = "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง";
         return;
       }
 
-      status.textContent = "📡 กำลังดึงพิกัด...";
+      statusDiv.textContent = "กำลังดึงพิกัด...";
 
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          const timestamp = new Date().toISOString();
+      navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
 
-          fetch("https://script.google.com/macros/s/AKfycbwZF_h5FNjf0_5u0vrEBVWz8I8e6MKhxfaak2XlU-J4RaTGoDdPfr71raVwSAhmZhnRng/exec", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: name,
-              lat: lat,
-              lng: lng,
-              timestamp: timestamp
-            })
+        const url = `https://script.google.com/macros/s/AKfycbx5E7Ex88dQ_8-JOvV0dHk0onm4VR5foaFKCtHZyrX06NgkDo_eArPD9phux912lb-GkQ/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}`;
+
+        fetch(url)
+          .then(res => res.text())
+          .then(msg => {
+            statusDiv.textContent = "✅ เช็คอินสำเร็จ";
           })
-          .then((res) => res.text())
-          .then((data) => {
-            status.textContent = "✅ เช็คอินสำเร็จแล้ว!";
-          })
-          .catch((err) => {
-            status.textContent = "❌ เกิดข้อผิดพลาด: " + err;
+          .catch(err => {
+            console.error(err);
+            statusDiv.textContent = "❌ เกิดข้อผิดพลาดขณะส่งข้อมูล";
           });
-        },
-        (err) => {
-          status.textContent = "❌ ไม่สามารถดึงพิกัดได้: " + err.message;
-        }
-      );
+      }, err => {
+        console.error(err);
+        statusDiv.textContent = "❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง";
+      });
     }
   </script>
 </body>
