@@ -1,74 +1,155 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>ระบบเช็คอิน</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: sans-serif; padding: 20px; background: #f2f2f2; }
-    h1 { color: #333; }
-    input, button {
-      font-size: 1rem;
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-      box-sizing: border-box;
+  <meta charset="UTF-8">
+  <title>ระบบเช็คอิน</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+        font-family: 'Inter', sans-serif; /* Using Inter font */
+        padding: 20px;
+        background: #f2f2f2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh; /* Ensure it takes full viewport height */
+        margin: 0;
     }
-    .status { margin-top: 15px; color: green; }
-  </style>
+    h1 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 8px; /* Rounded corners */
+    }
+    button {
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
+        border: none;
+    }
+    button:hover {
+        background-color: #45a049;
+    }
+    .status {
+        margin-top: 15px;
+        color: green;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #e6ffe6;
+        min-height: 20px; /* Ensure space for messages */
+    }
+    .container {
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 400px;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+        body {
+            padding: 10px;
+        }
+        .container {
+            padding: 20px;
+            width: 95%;
+        }
+    }
+  </style>
 </head>
 <body>
-  <h1>ระบบเช็คอิน</h1>
-  <label for="name">กรอกชื่อของคุณ:</label>
-  <input type="text" id="name" placeholder="ชื่อ-สกุล">
-  <button onclick="checkIn()">✅ เช็คอินพร้อมพิกัด</button>
-  <div class="status" id="status"></div>
+  <div class="container">
+    <h1>ระบบเช็คอิน</h1>
+    <label for="name">กรอกชื่อของคุณ:</label>
+    <input type="text" id="name" placeholder="ชื่อ-สกุล">
+    <button onclick="checkIn()">✅ เช็คอินพร้อมพิกัด</button>
+    <div class="status" id="status"></div>
+  </div>
 
 <script>
-  function checkIn() {
-    const name = document.getElementById("name").value.trim();
-    const statusDiv = document.getElementById("status");
+  function checkIn() {
+    const name = document.getElementById("name").value.trim();
+    const statusDiv = document.getElementById("status");
 
-    if (!name) {
-      alert("กรุณากรอกชื่อก่อนเช็คอิน");
-      return;
-    }
+    // Clear previous status message
+    statusDiv.textContent = "";
 
-    if (!navigator.geolocation) {
-      statusDiv.textContent = "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง";
-      return;
-    }
+    if (!name) {
+      // Replaced alert with direct message in statusDiv
+      statusDiv.textContent = "กรุณากรอกชื่อก่อนเช็คอิน";
+      statusDiv.style.color = "red";
+      statusDiv.style.backgroundColor = "#ffe6e6";
+      return;
+    }
 
-    statusDiv.textContent = "กำลังดึงพิกัด...";
+    if (!navigator.geolocation) {
+      statusDiv.textContent = "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง";
+      statusDiv.style.color = "red";
+      statusDiv.style.backgroundColor = "#ffe6e6";
+      return;
+    }
 
-    navigator.geolocation.getCurrentPosition(position => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
+    statusDiv.textContent = "กำลังดึงพิกัด...";
+    statusDiv.style.color = "orange";
+    statusDiv.style.backgroundColor = "#fffbe6";
 
-      const url = `https://script.google.com/macros/s/AKfycbx5E7Ex88dQ_8-JOvV0dHk0onm4VR5foaFKCtHZyrX06NgkDo_eArPD9phux912lb-GkQ/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}`;
 
-      fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          return res.json();  // แปลง response เป็น JSON
-        })
-        .then(data => {
-          if (data.status === 'success') {
-            statusDiv.textContent = "✅ เช็คอินสำเร็จ";
-          } else {
-            statusDiv.textContent = "❌ เกิดข้อผิดพลาด: " + (data.message || 'ไม่ทราบสาเหตุ');
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          statusDiv.textContent = "❌ เกิดข้อผิดพลาดขณะส่งข้อมูล";
-        });
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
 
-    }, err => {
-      console.error(err);
-      statusDiv.textContent = "❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง";
-    });
-  }
+      // Make sure to use the correct deployed Apps Script URL
+      const url = `https://script.google.com/macros/s/AKfycbx5E7Ex88dQ_8-JOvV0dHk0onm4VR5foaFKCtHZyrX06NgkDo_eArPD9phux912lb-GkQ/exec?name=${encodeURIComponent(name)}&lat=${lat}&lng=${lng}`;
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) {
+                // Handle HTTP errors more specifically
+                statusDiv.textContent = `❌ HTTP error! status: ${res.status}`;
+                statusDiv.style.color = "red";
+                statusDiv.style.backgroundColor = "#ffe6e6";
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+          return res.json();  // Convert response to JSON
+        })
+        .then(data => {
+          if (data.status === 'success') {
+            statusDiv.textContent = "✅ เช็คอินสำเร็จ";
+            statusDiv.style.color = "green";
+            statusDiv.style.backgroundColor = "#e6ffe6";
+          } else {
+            statusDiv.textContent = "❌ เกิดข้อผิดพลาด: " + (data.message || 'ไม่ทราบสาเหตุ');
+            statusDiv.style.color = "red";
+            statusDiv.style.backgroundColor = "#ffe6e6";
+          }
+        })
+        .catch(err => {
+          console.error("Fetch error:", err);
+          statusDiv.textContent = "❌ เกิดข้อผิดพลาดขณะส่งข้อมูล";
+          statusDiv.style.color = "red";
+          statusDiv.style.backgroundColor = "#ffe6e6";
+        });
+
+    }, err => {
+      console.error("Geolocation error:", err);
+      statusDiv.textContent = "❌ ไม่สามารถดึงพิกัดได้ โปรดอนุญาตการเข้าถึงตำแหน่ง";
+      statusDiv.style.color = "red";
+      statusDiv.style.backgroundColor = "#ffe6e6";
+    });
+  }
 </script>
 
 </body>
