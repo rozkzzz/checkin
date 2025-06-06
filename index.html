@@ -124,15 +124,22 @@
   </div>
 
   <script>
+    window.addEventListener("DOMContentLoaded", () => {
+    const savedName = localStorage.getItem("checkin_name");
+    if (savedName) {
+      document.getElementById("name").value = savedName;
+    }
+    });
     function checkIn() {
-      const name = document.getElementById("name").value.trim();
-      const statusDiv = document.getElementById("status");
-
+      const nameInput = document.getElementById("name");
+      const name = nameInput.value.trim();
       if (!name) {
-        alert("กรุณากรอกชื่อก่อนเช็คอิน");
-        return;
+        alert("กรุณากรอกชื่อก่อน");
+      return;
       }
-
+      
+      localStorage.setItem("checkin_name", name); // ✅ บันทึกชื่อ
+      
       if (!navigator.geolocation) {
         updateStatus("เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง", "error");
         return;
